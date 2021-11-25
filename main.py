@@ -53,8 +53,6 @@ def main():
 
     shifts = np.array([])
 
-
-
     for sheet in sheets:
         data = pd.read_excel(fileName, sheet_name=sheet)
         columns = data.columns
@@ -99,9 +97,15 @@ def main():
         currentPerson = shifts[i]
         row = np.array(currentPerson['name'])
         shiftText = ''
+        currentDay = ''
         for ii in range(len(currentPerson['shifts'])):
             currentShift = currentPerson['shifts'][ii]
-            shiftText += f"{currentShift['day']}: {currentShift['shift']} van {currentShift['startTime']} t/m {currentShift['endTime']} \n"
+            if currentShift['day'] == currentDay:
+                shiftText += f"{currentShift['shift']} van {currentShift['startTime']} t/m {currentShift['endTime']} \n"
+            else:
+                shiftText += f"{currentShift['day']}: \n" 
+                shiftText += f"{currentShift['shift']} van {currentShift['startTime']} t/m {currentShift['endTime']} \n"
+                currentDay = currentShift['day']
         row = np.append(row, shiftText)
         export.append(list(row))
 
