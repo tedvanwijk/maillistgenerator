@@ -92,20 +92,22 @@ def main():
                 previousName = currentName
 
     export = []
-
     for i in range(len(shifts)):
         currentPerson = shifts[i]
+        # sort shifts based on their start time but only for shifts that are on the same day
+        for sheet in sheets:
+            currentPerson['shifts'] = sorted(currentPerson['shifts'], key=lambda e: (e['day'] == sheet, e['startTime']))
         row = np.array(currentPerson['name'])
         shiftText = ''
         currentDay = ''
         for ii in range(len(currentPerson['shifts'])):
             currentShift = currentPerson['shifts'][ii]
-            if currentShift['day'] == currentDay:
-                shiftText += f"{currentShift['shift']} van {currentShift['startTime']} t/m {currentShift['endTime']} \n"
-            else:
+            startTime = currentShift['startTime'].strftime("%H:%M")
+            endTime = currentShift['endTime'].strftime("%H:%M")
+            if currentShift['day'] != currentDay:
                 shiftText += f"{currentShift['day']}: \n" 
-                shiftText += f"{currentShift['shift']} van {currentShift['startTime']} t/m {currentShift['endTime']} \n"
                 currentDay = currentShift['day']
+            shiftText += f"{currentShift['shift']} van {startTime} t/m {endTime} \n"
         row = np.append(row, shiftText)
         export.append(list(row))
 
@@ -113,7 +115,7 @@ def main():
     df = pd.DataFrame(export)
     df.to_csv(f"{outputFileName}.csv")
 
-    input('\nLet op! hierboven kunnen nog belangrijke meldingen staan! Druk op enter om het script af te sluiten')
+    input('\nLet op! hierboven kunnen nog belangrijke meldingen staan! Druk op enter om het script af te sluiten...')
 
 if __name__ == '__main__':
     try:
