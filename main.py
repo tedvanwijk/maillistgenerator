@@ -94,9 +94,13 @@ def main():
     export = []
     for i in range(len(shifts)):
         currentPerson = shifts[i]
-        # sort shifts based on their start time but only for shifts that are on the same day
-        for sheet in sheets:
-            currentPerson['shifts'] = sorted(currentPerson['shifts'], key=lambda e: (e['day'] == sheet, e['startTime']))
+        
+        # old method, just here for reference in case the new one breaks: sort shifts based on their start time but only for shifts that are on the same day
+        # for sheet in sheets:
+        #     currentPerson['shifts'] = sorted(currentPerson['shifts'], key=lambda e: (e['day'] == sheet, e['startTime']))
+
+        # new sorting method, use the index of the sheet name in the input array as primary sorting key, use the starttime as the second
+        currentPerson['shifts'] = sorted(currentPerson['shifts'], key=lambda e: (np.where(sheets == e['day'])[0], e['startTime']))
         row = np.array(currentPerson['name'])
         shiftText = ''
         currentDay = ''
