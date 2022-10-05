@@ -31,7 +31,7 @@ def addShift(name,shift,shifts):
             if currentShift['day'] == shift['day'] and currentShift['startTime'] < shift['endTime'] and currentShift['endTime'] > shift['startTime']:
                 minTime = np.min([currentShift['startTime'], shift['startTime']])
                 maxTime = np.max([currentShift['endTime'], shift['endTime']])
-                print(f"\nLet op! Er is een dubbele shift ingepland voor {currentPerson['name']}: {currentShift['shift']} end {shift['shift']} op {currentShift['day']} van {minTime} tot {maxTime}\n")
+                print(f"\nLet op! Er is een dubbele shift ingepland voor {currentPerson['name']}: {currentShift['shift']} en {shift['shift']} op {currentShift['day']} van {minTime} tot {maxTime}\n")
         shifts[nameIndex]['shifts'] = np.append(shifts[nameIndex]['shifts'], shift)
     return shifts
 
