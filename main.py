@@ -1,5 +1,7 @@
+from fileinput import filename
 import numpy as np
 import pandas as pd
+from datetime import datetime, timedelta
 
 def findName(name, shifts):
     for i in range(len(shifts)):
@@ -35,22 +37,7 @@ def addShift(name,shift,shifts):
         shifts[nameIndex]['shifts'] = np.append(shifts[nameIndex]['shifts'], shift)
     return shifts
 
-def main():
-    print('Hallo daar! Welkom bij de maillijst generator! Om dit te gebruiken moet je Python hebben geinstalleerd met de packages numpy en pandas. \n')
-
-    fileName = input('Wat is de bestandsnaam? (incl. de bestandsextensie zoals .xlsx of .csv!): \n')
-    print('\nJe wordt nu gevraagd om de namen van de sheets op te geven waar een maillijst van moet worden gemaakt. Dus, stel je hebt een sheet "Zaterdag" en "Zondag" dan vul je die een voor een in \n')
-
-    sheetInput = '_'
-    sheets = np.array([])
-
-    while sheetInput != '':
-        sheetInput = input('Vul de naam van een enkele sheet in. Als je ze allemaal in hebt gevuld, druk je alleen op enter: \n')
-        sheets = np.append(sheets, sheetInput)
-    sheets = sheets[:-1]
-
-    outputFileName = input("Wat moet de naam worden van het uiteindelijke bestand? (zonder bestandsextensie, het wordt een .csv): \n")
-
+def generateMailList(fileName, sheets, outputFileName):
     shifts = np.array([])
 
     for sheet in sheets:
@@ -117,14 +104,79 @@ def main():
 
     export = np.asarray(export)
     df = pd.DataFrame(export)
-    df.to_csv(f"{outputFileName}.csv")
+    df.to_csv(f"{outputFileName}.csv", index=False, header=False)
+
+def generateReportList(fileName, sheets):
+    for sheet in sheets:
+        data = pd.read_excel(fileName, sheet_name=sheet)
+        columns = data.columns
+        rowCount = len(data.index)
+        startingColumn = columns.get_loc('-') + 1
+        # the total length minus where the times start is the length of the time columns
+        columnLoopLength = len(columns) - startingColumn
+
+        previousPeople = np.empty(rowCount, dtype=object)
+        output = np.array([])
+
+        for i in range(columnLoopLength):
+            currentColumn = columns[i + startingColumn]
+            columnData = data[currentColumn]
+            for index, value in columnData.iteritems():
+                if value == previousPeople[index]:
+                    continue
+                elif pd.isnull(value):
+                    previousPeople[index] = ''
+                else:
+                    reportTime = (datetime.combine(datetime.now().date(), currentColumn) - timedelta(minutes=15)).time()
+                    newEntry = {
+                        'startTime': currentColumn.strftime("%H:%M"),
+                        'reportTime': reportTime.strftime("%H:%M"),
+                        'name': value,
+                        'shift': data[columns[0]][index]
+                    }
+                    output = np.append(output, newEntry)
+                    previousPeople[index] = value
+
+        export = [['Starttijd', 'Meldtijd', 'Naam', 'Shift']]
+        for i in range(len(output)):
+            row = [
+                output[i]['startTime'],
+                output[i]['reportTime'],
+                output[i]['name'],
+                output[i]['shift']
+            ]
+            export.append(list(row))
+
+        export = np.asarray(export)
+        df = pd.DataFrame(export)
+        df.to_csv(f"{sheet}_meldlijst.csv", index=False, header=False)
+
+def main():
+    print('Hallo daar! Welkom bij de maillijst generator! Om dit te gebruiken moet je Python hebben geinstalleerd met de packages numpy en pandas. \n')
+
+    fileName = input('Wat is de bestandsnaam? (incl. de bestandsextensie zoals .xlsx of .csv!): \n')
+    print('\nJe wordt nu gevraagd om de namen van de sheets op te geven waar een maillijst van moet worden gemaakt. Dus, stel je hebt een sheet "Zaterdag" en "Zondag" dan vul je die een voor een in \n')
+
+    sheetInput = '_'
+    sheets = np.array([])
+
+    while sheetInput != '':
+        sheetInput = input('Vul de naam van een enkele sheet in. Als je ze allemaal in hebt gevuld, druk je alleen op enter: \n')
+        sheets = np.append(sheets, sheetInput)
+    sheets = sheets[:-1]
+
+    outputFileName = input("Wat moet de naam worden van het uiteindelijke bestand? (zonder bestandsextensie, het wordt een .csv): \n")
+
+    generateMailList(fileName, sheets, outputFileName)
+    generateReportList(fileName, sheets)
 
     input('\nLet op! hierboven kunnen nog belangrijke meldingen staan! Druk op enter om het script af te sluiten...')
 
 if __name__ == '__main__':
-    try:
-        main()
-    except Exception as e:
-        print('\nEr is een foutmelding opgetreden. Als je deze error niet snapt of het programma werkt niet zoals het hoort, kan je een mailtje sturen naar tedvanwijk@gmail.com met onderstaande error erbij:\n')
-        print(e)
-        input()
+    main()
+    # try:
+    #     main()
+    # except Exception as e:
+    #     print('\nEr is een foutmelding opgetreden. Als je deze error niet snapt of het programma werkt niet zoals het hoort, kan je een mailtje sturen naar tedvanwijk@gmail.com met onderstaande error erbij:\n')
+    #     print(e)
+    #     input()
