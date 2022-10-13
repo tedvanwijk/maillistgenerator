@@ -172,10 +172,9 @@ def main():
     input('\nLet op! hierboven kunnen nog belangrijke meldingen staan! Druk op enter om het script af te sluiten...')
 
 if __name__ == '__main__':
-    main()
-    # try:
-    #     main()
-    # except Exception as e:
-    #     print('\nEr is een foutmelding opgetreden. Als je deze error niet snapt of het programma werkt niet zoals het hoort, kan je een mailtje sturen naar tedvanwijk@gmail.com met onderstaande error erbij:\n')
-    #     print(e)
-    #     input()
+    try:
+        main()
+    except Exception as e:
+        print('\nEr is een foutmelding opgetreden. Als je deze error niet snapt of het programma werkt niet zoals het hoort, kan je een mailtje sturen naar tedvanwijk@gmail.com met onderstaande error erbij:\n')
+        print(e)
+        input()
