@@ -49,10 +49,20 @@ def generateMailList(fileName, sheets, outputFileName):
             previousName = ''
             newShift = {}
             for i in range(columnLoopLength):
-                currentTime = columns[startingColumn + i]
-
+                # currentTime = columns[startingColumn + i]
+                
+                try:
+                    currentTimeString = str(columns[startingColumn + i])
+                    if currentTimeString.find(' ') != -1:
+                        currentTimeString = currentTimeString.split(' ')[1]
+                    dotIndex = currentTimeString.find('.')
+                    if dotIndex != -1:
+                        currentTimeString = currentTimeString[:dotIndex]
+                    currentTime = datetime.strptime(currentTimeString, '%H:%M:%S').time()
+                except:
+                    currentTime = ''
                 # if the current name is nan, it is the ending time of the previous person's shift
-                if pd.isnull(row[currentTime]):
+                if pd.isnull(row[columns[startingColumn + i]]):
                     if previousName != '':
                         newShift['endTime'] = currentTime
                         shifts = addShift(previousName,newShift,shifts)
@@ -60,8 +70,21 @@ def generateMailList(fileName, sheets, outputFileName):
                         continue
                     else:
                         continue
-                endTime = columns[startingColumn + i + 1]
-                currentName = row[currentTime].strip().lower()
+
+                # endTime = columns[startingColumn + i + 1]
+
+                try:
+                    endTimeString = str(columns[startingColumn + i + 1])
+                    if endTimeString.find(' ') != -1:
+                        endTimeString = endTimeString.split(' ')[1]
+                    dotIndex = endTimeString.find('.')
+                    if dotIndex != -1:
+                        endTimeString = endTimeString[:dotIndex]
+                    endTime = datetime.strptime(endTimeString, '%H:%M:%S').time()
+                except:
+                    endTime = ''
+                # endTime = datetime.strptime(columns[startingColumn + i + 1], format='%H:%M')
+                currentName = row[columns[startingColumn + i]].strip().lower()
 
                 if previousName != currentName:
                     # if this is true that means we have reached the end of someone's shift, so we can add it to the shifts array
@@ -172,6 +195,7 @@ def main():
     input('\nLet op! hierboven kunnen nog belangrijke meldingen staan! Druk op enter om het script af te sluiten...')
 
 if __name__ == '__main__':
+    # main()
     try:
         main()
     except Exception as e:
